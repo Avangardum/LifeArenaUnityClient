@@ -12,16 +12,12 @@ namespace Avangardum.LifeArena.UnityClient.Views
     {
         private const float MaxZoom = 2f;
         private const float MinZoom = 0.1f;
-        private const float ScrollZoomSensitivity = 0.1f;
         private const float MinZoomToShowBorder = 0.4f;
         private const float CellOffset = 50;
         
         [SerializeField] private GameObject _cellViewPrefab;
-        [SerializeField] private Sprite _deadCellSprite;
-        [SerializeField] private Sprite _livingCellSprite;
         
         private CellView[,] _cells;
-        private Vector2? _lastMousePosition;
         
         public event EventHandler<IFieldView.CellClickedEventArgs> CellClicked;
 
@@ -39,24 +35,10 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 ColorCells(value);
             }
         }
-        
-        private bool IsMouseOverField
-        {
-            get
-            {
-                PointerEventData eventData = new PointerEventData(EventSystem.current);
-                eventData.position = Input.mousePosition;
-                List<RaycastResult> raycastResults = new List<RaycastResult>();
-                EventSystem.current.RaycastAll(eventData, raycastResults);
-                var isMouseOverField = 
-                    !raycastResults.Any() || raycastResults.First().gameObject.CompareTag(Tags.CellView);
-                return isMouseOverField;
-            }
-        }
 
         public float Zoom
         {
-            private get => transform.localScale.x;
+            get => transform.localScale.x;
             set
             {
                 // Focus point is the position of the mouse in the coordinate system of the field if zoom is 1.
@@ -80,6 +62,11 @@ namespace Avangardum.LifeArena.UnityClient.Views
                     cell.IsBorderVisible = isBorderVisible;
                 }
             }
+        }
+
+        public void Move(Vector2 movement)
+        {
+            transform.Translate(movement, Space.World);
         }
 
         private void ClearCells()
@@ -112,7 +99,6 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         private void OnCellClicked(int x, int y)
         {
-            Debug.Log($"Cell clicked: {x}, {y}");
             CellClicked?.Invoke(this, new IFieldView.CellClickedEventArgs(x, y));
         }
 
@@ -136,30 +122,6 @@ namespace Avangardum.LifeArena.UnityClient.Views
             livingCells[3, 2] = true;
             livingCells[2, 3] = true;
             LivingCells = livingCells;
-        }
-
-        private void Update()
-        {
-            ProcessFieldMovement();
-            ProcessFieldZoom();
-
-            void ProcessFieldMovement()
-            {
-                if (Input.GetMouseButton(0) && IsMouseOverField && _lastMousePosition is { } lastMousePosition)
-                {
-                    var mousePositionDelta = (Vector2)Input.mousePosition - lastMousePosition;
-                    transform.Translate(mousePositionDelta);
-                }
-
-                _lastMousePosition = Input.mousePosition;
-            }
-            
-            void ProcessFieldZoom()
-            {
-                var zoomDelta = Input.mouseScrollDelta.y * ScrollZoomSensitivity;
-                if (zoomDelta == 0) return;
-                Zoom += zoomDelta;
-            }
         }
     }
 }

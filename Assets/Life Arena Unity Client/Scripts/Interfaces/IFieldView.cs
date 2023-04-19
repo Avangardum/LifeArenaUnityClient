@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Avangardum.LifeArena.UnityClient.Interfaces
 {
@@ -10,6 +11,8 @@ namespace Avangardum.LifeArena.UnityClient.Interfaces
         
         bool[,] LivingCells { set; }
         
-        float Zoom { set; }
+        float Zoom { get; set; }
+        
+        void Move(Vector2 movement);
     }
 }
