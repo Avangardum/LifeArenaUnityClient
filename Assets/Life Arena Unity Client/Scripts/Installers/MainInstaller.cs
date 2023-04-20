@@ -1,7 +1,8 @@
-﻿using Avangardum.LifeArena.UnityClient.Interfaces;
+﻿using Avangardum.LifeArena.Shared;
+using Avangardum.LifeArena.UnityClient.Interfaces;
 using Avangardum.LifeArena.UnityClient.IO;
 using Avangardum.LifeArena.UnityClient.Presenters;
-using Avangardum.LifeArena.UnityClient.Views;
+using Avangardum.LifeArena.UnityClient.ServerCommunication;
 using Zenject;
 
 namespace Avangardum.LifeArena.UnityClient.Installers
@@ -13,6 +14,8 @@ namespace Avangardum.LifeArena.UnityClient.Installers
             Container.BindInterfacesAndSelfTo<InputManager>().AsSingle();
             Container.Bind<IFieldView>().FromComponentInHierarchy().AsSingle();
             Container.Bind<FieldInputPresenter>().AsSingle().NonLazy();
+            Container.Bind<ILivingCellsArrayPreserializer>().To<LivingCellsArrayPreserializer>().AsSingle();
+            Container.Bind<IServerFacade>().To<ServerFacade>().AsSingle();
         }
     }
 }
