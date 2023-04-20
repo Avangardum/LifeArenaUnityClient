@@ -48,7 +48,7 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
             }
             var json = await response.Content.ReadAsStringAsync();
             var gameStateResponse = JsonConvert.DeserializeObject<GameStateResponse>(json);
-            var livingCells = _livingCellsArrayPreserializer.Despreserialize(gameStateResponse.LivingCells);
+            var livingCells = _livingCellsArrayPreserializer.Depreserialize(gameStateResponse.LivingCells);
             var gameState = new GameState(livingCells, gameStateResponse.Generation, gameStateResponse.TimeUntilNextGeneration,
                 gameStateResponse.CellsLeft, gameStateResponse.MaxCellsPerPlayerPerGeneration);
             return gameState;
