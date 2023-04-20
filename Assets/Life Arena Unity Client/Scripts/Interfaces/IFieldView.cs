@@ -1,12 +1,11 @@
 ﻿using System;
+using Avangardum.LifeArena.UnityClient.Data;
 using UnityEngine;
 
 namespace Avangardum.LifeArena.UnityClient.Interfaces
 {
     public interface IFieldView
     {
-        public record CellClickedEventArgs(int X, int Y);
-        
         event EventHandler<CellClickedEventArgs> CellClicked;
         
         bool[,] LivingCells { set; }

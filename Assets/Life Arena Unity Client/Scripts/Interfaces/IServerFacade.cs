@@ -6,6 +6,6 @@ namespace Avangardum.LifeArena.UnityClient.Interfaces
     public interface IServerFacade
     {
         Task<GameState> GetGameState();
-        Task AddCell(int x, int y);
+        Task<GameState> AddCell(int x, int y);
     }
 }

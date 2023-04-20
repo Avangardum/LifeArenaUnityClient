@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Interfaces;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -19,7 +20,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
         
         private CellView[,] _cells;
         
-        public event EventHandler<IFieldView.CellClickedEventArgs> CellClicked;
+        public event EventHandler<CellClickedEventArgs> CellClicked;
 
         public bool[,] LivingCells
         {
@@ -99,7 +100,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         private void OnCellClicked(int x, int y)
         {
-            CellClicked?.Invoke(this, new IFieldView.CellClickedEventArgs(x, y));
+            CellClicked?.Invoke(this, new CellClickedEventArgs(x, y));
         }
 
         private void ColorCells(bool[,] livingCells)

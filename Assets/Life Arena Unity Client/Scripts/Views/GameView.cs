@@ -1,4 +1,5 @@
-﻿using Avangardum.LifeArena.UnityClient.Data;
+﻿using System;
+using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Interfaces;
 using UnityEngine;
 using Zenject;
@@ -13,7 +14,11 @@ namespace Avangardum.LifeArena.UnityClient.Views
         public void Inject(IFieldView fieldView)
         {
             _fieldView = fieldView;
+            
+            fieldView.CellClicked += OnCellClicked;
         }
+
+        public event EventHandler<CellClickedEventArgs> CellClicked;
 
         public GameState GameState
         {
@@ -36,6 +41,11 @@ namespace Avangardum.LifeArena.UnityClient.Views
         public void ShowUnknownErrorMessage(string message)
         {
             Debug.LogError(message);
+        }
+        
+        private void OnCellClicked(object sender, CellClickedEventArgs e)
+        {
+            CellClicked?.Invoke(this, e);
         }
     }
 }

@@ -24,6 +24,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
         
         public bool IsAlive
         {
+            get => _image.color == AliveColor;
             set => _image.color = value ? AliveColor : DeadColor;
         }
         
@@ -52,10 +53,10 @@ namespace Avangardum.LifeArena.UnityClient.Views
         {
             var mouseMovement = Vector2.Distance(_pointerPositionOnLastMouseButtonDown, Input.mousePosition);
             var timePassed = Time.time - _timeOnLastMouseButtonDown;
-            if (mouseMovement <= MaxMouseMovementToRegisterClick && timePassed <= MaxTimeToRegisterClick)
-            {
-                Clicked?.Invoke(this, EventArgs.Empty);
-            }
+            if (IsAlive) return;
+            if (timePassed > MaxTimeToRegisterClick) return;
+            if (mouseMovement > MaxMouseMovementToRegisterClick) return;
+            Clicked?.Invoke(this, EventArgs.Empty);
         }
     }
 }

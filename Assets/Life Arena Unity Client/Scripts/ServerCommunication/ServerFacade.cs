@@ -40,15 +40,10 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
                 throw new Exception(); // Should never be reached
             }
             AssertIsSuccessStatusCode(response);
-            var json = await response.Content.ReadAsStringAsync();
-            var gameStateResponse = JsonConvert.DeserializeObject<GameStateResponse>(json);
-            var livingCells = _livingCellsArrayPreserializer.Depreserialize(gameStateResponse.LivingCells);
-            var gameState = new GameState(livingCells, gameStateResponse.Generation, gameStateResponse.TimeUntilNextGeneration,
-                gameStateResponse.CellsLeft, gameStateResponse.MaxCellsPerPlayerPerGeneration);
-            return gameState;
+            return await ProcessGameStateResponse(response);
         }
 
-        public async Task AddCell(int x, int y)
+        public async Task<GameState> AddCell(int x, int y)
         {
             using var client = CreateHttpClient();
             var url = string.Format(AddCellUrlTemplate, x, y);
@@ -63,6 +58,17 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
                 throw new Exception(); // Should never be reached
             }
             AssertIsSuccessStatusCode(response);
+            return await ProcessGameStateResponse(response);
+        }
+
+        private async Task<GameState> ProcessGameStateResponse(HttpResponseMessage response)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var gameStateResponse = JsonConvert.DeserializeObject<GameStateResponse>(json);
+            var livingCells = _livingCellsArrayPreserializer.Depreserialize(gameStateResponse.LivingCells);
+            var gameState = new GameState(livingCells, gameStateResponse.Generation, gameStateResponse.TimeUntilNextGeneration,
+                gameStateResponse.CellsLeft, gameStateResponse.MaxCellsPerPlayerPerGeneration);
+            return gameState;
         }
 
         private HttpClient CreateHttpClient()
