@@ -13,9 +13,11 @@ namespace Avangardum.LifeArena.UnityClient.Installers
         {
             Container.BindInterfacesAndSelfTo<InputManager>().AsSingle();
             Container.Bind<IFieldView>().FromComponentInHierarchy().AsSingle();
-            Container.Bind<FieldInputPresenter>().AsSingle().NonLazy();
             Container.Bind<ILivingCellsArrayPreserializer>().To<LivingCellsArrayPreserializer>().AsSingle();
             Container.Bind<IServerFacade>().To<ServerFacade>().AsSingle();
+            
+            Container.Bind<FieldInputPresenter>().AsSingle().NonLazy();
+            Container.Bind<GamePresenter>().AsSingle().NonLazy();
         }
     }
 }
