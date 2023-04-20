@@ -39,7 +39,6 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
 
         public async Task<GameState> GetGameState()
         {
-            Debug.Log("start");
             using var client = new HttpClient();
             client.Timeout = Timeout;
             var response = await client.GetAsync(GetGameStateUrl);
@@ -48,7 +47,6 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
                 throw new HttpRequestException($"Server returned {response.StatusCode} status code");
             }
             var json = await response.Content.ReadAsStringAsync();
-            Debug.Log(json);
             var gameStateResponse = JsonConvert.DeserializeObject<GameStateResponse>(json);
             var livingCells = _livingCellsArrayPreserializer.Despreserialize(gameStateResponse.LivingCells);
             var gameState = new GameState(livingCells, gameStateResponse.Generation, gameStateResponse.TimeUntilNextGeneration,
