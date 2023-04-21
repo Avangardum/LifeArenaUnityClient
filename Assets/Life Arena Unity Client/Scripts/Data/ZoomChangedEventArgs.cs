@@ -1,4 +1,4 @@
 ﻿namespace Avangardum.LifeArena.UnityClient.Data
 {
-    public record ZoomChangedEventArgs(float Value);
+    public record ZoomChangedEventArgs(float Zoom, float ZoomPercentage);
 }

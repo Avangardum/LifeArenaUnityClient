@@ -19,10 +19,11 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private int _generation;
         private TimeSpan _timeUntilNextGeneration;
         
-        public event EventHandler<ZoomChangedEventArgs> ZoomPercentageChanged;
+        public event EventHandler<ZoomPercentageChangedEventArgs> ZoomPercentageChanged;
 
         public int Generation
         {
+            private get => _generation;
             set
             {
                 _generation = value;
@@ -34,6 +35,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         public TimeSpan TimeUntilNextGeneration
         {
+            private get => _timeUntilNextGeneration;
             set
             {
                 _timeUntilNextGeneration = value;
@@ -42,12 +44,12 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 Assert.AreNotEqual(TimeSpan.Zero, NextGenerationInterval);
                 var fillAmount = Mathf.InverseLerp(0, (float)NextGenerationInterval.TotalSeconds, 
                     (float)_timeUntilNextGeneration.TotalSeconds);
-                if (_generation % 2 == 1)
+                if (Generation % 2 == 1)
                 {
                     fillAmount = 1 - fillAmount;
                 }
                 _nextGenerationTimerClockFilling.fillAmount = fillAmount;
-                _nextGenerationTimerClockFilling.fillClockwise = _generation % 2 == 1;
+                _nextGenerationTimerClockFilling.fillClockwise = Generation % 2 == 1;
             }
         }
 
@@ -58,8 +60,27 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         public float ZoomPercentage
         {
-            get => throw new NotImplementedException();
-            set => throw new NotImplementedException();
+            get => _zoomSlider.value;
+            set => _zoomSlider.value = value;
+        }
+
+        private void Awake()
+        {
+            _zoomSlider.onValueChanged.AddListener(OnZoomSliderValueChanged);
+        }
+
+        private void Update()
+        {
+            TimeUntilNextGeneration -= TimeSpan.FromSeconds(Time.deltaTime);
+            if (TimeUntilNextGeneration < TimeSpan.Zero)
+            {
+                TimeUntilNextGeneration = TimeSpan.Zero;
+            }
+        }
+
+        private void OnZoomSliderValueChanged(float value)
+        {
+            ZoomPercentageChanged?.Invoke(this, new ZoomPercentageChangedEventArgs(value));
         }
     }
 }

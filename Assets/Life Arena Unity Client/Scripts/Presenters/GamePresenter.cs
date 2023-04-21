@@ -24,8 +24,8 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
 
         private async void GetGameStateLoop()
         {
-            var getGameStateDelay = TimeSpan.FromSeconds(1);
-            var timerCheckDelay = TimeSpan.FromSeconds(0.1);
+            var getGameStateDelay = TimeSpan.FromSeconds(0.2);
+            var timerCheckDelay = TimeSpan.FromSeconds(0.04);
             
             while (true)
             {

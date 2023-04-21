@@ -5,7 +5,7 @@ namespace Avangardum.LifeArena.UnityClient.Interfaces
 {
     public interface IHeader
     {
-        event EventHandler<ZoomChangedEventArgs> ZoomPercentageChanged; 
+        event EventHandler<ZoomPercentageChangedEventArgs> ZoomPercentageChanged; 
 
         int Generation { set; }
         TimeSpan NextGenerationInterval { set; }

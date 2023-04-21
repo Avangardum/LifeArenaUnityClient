@@ -19,7 +19,10 @@ namespace Avangardum.LifeArena.UnityClient.Views
             _windowManager = windowManager;
             _header = header;
             
-            fieldView.CellClicked += OnCellClicked;
+            _fieldView.CellClicked += OnCellClicked;
+            _fieldView.ZoomChanged += OnFieldZoomChanged;
+            
+            _header.ZoomPercentageChanged += OnHeaderZoomPercentageChanged;
         }
 
         public event EventHandler<CellClickedEventArgs> CellClicked;
@@ -59,6 +62,17 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private void OnCellClicked(object sender, CellClickedEventArgs e)
         {
             CellClicked?.Invoke(this, e);
+        }
+        
+        private void OnHeaderZoomPercentageChanged(object sender, ZoomPercentageChangedEventArgs e)
+        {
+            _fieldView.ZoomFocusPointMode = ZoomFocusPointMode.ScreenCenter;
+            _fieldView.ZoomPercentage = e.ZoomPercentage;
+        }
+        
+        private void OnFieldZoomChanged(object sender, ZoomChangedEventArgs e)
+        {
+            _header.ZoomPercentage = e.ZoomPercentage;
         }
     }
 }

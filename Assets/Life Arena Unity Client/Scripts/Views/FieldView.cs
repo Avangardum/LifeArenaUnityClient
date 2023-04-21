@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Interfaces;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.EventSystems;
 
 namespace Avangardum.LifeArena.UnityClient.Views
 {
@@ -21,6 +18,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private CellView[,] _cells;
         
         public event EventHandler<CellClickedEventArgs> CellClicked;
+        public event EventHandler<ZoomChangedEventArgs> ZoomChanged;
 
         public bool[,] LivingCells
         {
@@ -43,17 +41,27 @@ namespace Avangardum.LifeArena.UnityClient.Views
             get => transform.localScale.x;
             set
             {
-                // Focus point is the position of the mouse in the coordinate system of the field if zoom is 1.
+                if (value == Zoom) return;
+                
+                // Focus point is the position of the mouse(in case of scrolling) / center of the screen (in case of
+                // using zoom slider) in the coordinate system of the field if zoom is 1.
                 // After zooming, the focus point should remain the same, so that the mouse is still over the same cell.
-                var focusPoint = ( (Vector2)Input.mousePosition - (Vector2)transform.position ) / Zoom;
+                // Focus is the above mentioned object (mouse / center of the screen)
+                var focusPosition = ZoomFocusPointMode switch
+                {
+                    ZoomFocusPointMode.Mouse => (Vector2)Input.mousePosition,
+                    ZoomFocusPointMode.ScreenCenter => new Vector2(Screen.width / 2f, Screen.height / 2f),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                var focusPoint = ( focusPosition - (Vector2)transform.position ) / Zoom;
                 
                 var newZoom = Mathf.Clamp(value, MinZoom, MaxZoom);
                 transform.localScale = new Vector3(newZoom, newZoom, 1f);
                 
-                // What position the mouse should have in the coordinate system of the field after zooming.
-                var newRelativeMousePosition = focusPoint * newZoom;
+                // What position the focus should have in the coordinate system of the field after zooming.
+                var newRelativeFocusPosition = focusPoint * newZoom;
                 
-                var newPosition = (Vector2)Input.mousePosition - newRelativeMousePosition;
+                var newPosition = focusPosition - newRelativeFocusPosition;
                 transform.position = newPosition;
 
                 var isBorderVisible = newZoom >= MinZoomToShowBorder;
@@ -61,8 +69,22 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 {
                     cell.IsBorderVisible = isBorderVisible;
                 }
+                
+                ZoomChanged?.Invoke(this, new ZoomChangedEventArgs(Zoom, ZoomPercentage));
             }
         }
+
+        public float ZoomPercentage
+        {
+            get => Mathf.InverseLerp(MinZoom, MaxZoom, Zoom);
+            set
+            {
+                if (value == ZoomPercentage) return;
+                Zoom = Mathf.Lerp(MinZoom, MaxZoom, value);
+            }
+        }
+
+        public ZoomFocusPointMode ZoomFocusPointMode { private get; set; }
 
         public void Move(Vector2 movement)
         {

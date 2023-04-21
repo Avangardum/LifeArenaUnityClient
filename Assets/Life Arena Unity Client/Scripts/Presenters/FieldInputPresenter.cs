@@ -1,4 +1,5 @@
 ﻿using Avangardum.LifeArena.UnityClient.Interfaces;
+using Avangardum.LifeArena.UnityClient.Views;
 using UnityEngine;
 
 namespace Avangardum.LifeArena.UnityClient.Presenters
@@ -24,6 +25,7 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
 
         private void OnFieldZoomChangeRequested(object sender, IInputManager.FieldZoomChangeRequestedEventArgs e)
         {
+            _fieldView.ZoomFocusPointMode = ZoomFocusPointMode.Mouse;
             _fieldView.Zoom += e.ZoomChange;
         }
     }
