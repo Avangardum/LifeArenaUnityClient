@@ -10,12 +10,14 @@ namespace Avangardum.LifeArena.UnityClient.Views
     {
         private IFieldView _fieldView;
         private IWindowManager _windowManager;
+        private IHeader _header;
         
         [Inject]
-        public void Inject(IFieldView fieldView, IWindowManager windowManager)
+        public void Inject(IFieldView fieldView, IWindowManager windowManager, IHeader header)
         {
             _fieldView = fieldView;
             _windowManager = windowManager;
+            _header = header;
             
             fieldView.CellClicked += OnCellClicked;
         }
@@ -30,6 +32,10 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 
                 _windowManager.IsNoInternetConnectionWindowVisible = false;
                 _windowManager.IsServerUnavailableWindowVisible = false;
+                
+                _header.Generation = value.Generation;
+                _header.TimeUntilNextGeneration = value.TimeUntilNextGeneration;
+                _header.CellsLeft = value.CellsLeft;
             }
         }
 

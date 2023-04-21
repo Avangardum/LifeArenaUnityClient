@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Exceptions;
 using Avangardum.LifeArena.UnityClient.Interfaces;
-using UnityEngine;
 
 namespace Avangardum.LifeArena.UnityClient.Presenters
 {
