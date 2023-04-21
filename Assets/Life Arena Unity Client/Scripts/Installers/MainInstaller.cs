@@ -13,10 +13,11 @@ namespace Avangardum.LifeArena.UnityClient.Installers
         public override void InstallBindings()
         {
             Container.BindInterfacesAndSelfTo<InputManager>().AsSingle();
-            
+
             Container.Bind<IFieldView>().FromComponentInHierarchy().AsSingle();
+            Container.Bind<IWindowManager>().FromComponentInHierarchy().AsSingle();
             Container.Bind<IGameView>().To<GameView>().AsSingle();
-            
+
             Container.Bind<ILivingCellsArrayPreserializer>().To<LivingCellsArrayPreserializer>().AsSingle();
             Container.Bind<IServerFacade>().To<ServerFacade>().AsSingle();
             

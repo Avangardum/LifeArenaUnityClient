@@ -9,11 +9,13 @@ namespace Avangardum.LifeArena.UnityClient.Views
     public class GameView : IGameView
     {
         private IFieldView _fieldView;
+        private IWindowManager _windowManager;
         
         [Inject]
-        public void Inject(IFieldView fieldView)
+        public void Inject(IFieldView fieldView, IWindowManager windowManager)
         {
             _fieldView = fieldView;
+            _windowManager = windowManager;
             
             fieldView.CellClicked += OnCellClicked;
         }
@@ -25,17 +27,22 @@ namespace Avangardum.LifeArena.UnityClient.Views
             set
             {
                 _fieldView.LivingCells = value.LivingCells;
+                
+                _windowManager.IsNoInternetConnectionWindowVisible = false;
+                _windowManager.IsServerUnavailableWindowVisible = false;
             }
         }
 
         public void ShowNoInternetConnectionMessage()
         {
-            Debug.LogError("No internet connection");
+            _windowManager.IsServerUnavailableWindowVisible = false;
+            _windowManager.IsNoInternetConnectionWindowVisible = true;
         }
 
         public void ShowServerUnavailableMessage()
         {
-            Debug.LogError("Server unavailable");
+            _windowManager.IsNoInternetConnectionWindowVisible = false;
+            _windowManager.IsServerUnavailableWindowVisible = true;
         }
 
         public void ShowUnknownErrorMessage(string message)
