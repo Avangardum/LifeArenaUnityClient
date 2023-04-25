@@ -39,6 +39,19 @@ namespace Avangardum.LifeArena.UnityClient.Views
             }
         }
 
+        public float ZoomPercentage
+        {
+            get => ZoomToZoomPercentage(Zoom);
+            set
+            {
+                var clampedValue = Mathf.Clamp(value, 0, 1);
+                if (clampedValue == ZoomPercentage) return;
+                Zoom = ZoomPercentageToZoom(clampedValue);
+            }
+        }
+
+        public ZoomFocusPointMode ZoomFocusPointMode { private get; set; }
+
         private float Zoom
         {
             get => transform.localScale.x;
@@ -67,32 +80,22 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 var newPosition = focusPosition - newRelativeFocusPosition;
                 transform.position = newPosition;
 
-                var isBorderVisible = newZoom >= MinZoomToShowBorder;
-                foreach (var cell in _cells)
-                {
-                    cell.IsBorderVisible = isBorderVisible;
-                }
-                
+                SetCellBorderVisibility();
+
                 ZoomChanged?.Invoke(this, new ZoomChangedEventArgs(Zoom, ZoomPercentage));
             }
         }
-
-        public float ZoomPercentage
-        {
-            get => ZoomToZoomPercentage(Zoom);
-            set
-            {
-                var clampedValue = Mathf.Clamp(value, 0, 1);
-                if (clampedValue == ZoomPercentage) return;
-                Zoom = ZoomPercentageToZoom(clampedValue);
-            }
-        }
-
-        public ZoomFocusPointMode ZoomFocusPointMode { private get; set; }
+        
+        private float ZoomedCellSize => CellSize * Zoom;
+        
+        private Vector2 ScreenCenter => Vector2.zero;
+        
+        private Vector2 ScreenSize => new Vector2(Screen.width, Screen.height);
 
         public void Move(Vector2 movement)
         {
             transform.Translate(movement, Space.World);
+            SetCellBorderVisibility();
         }
 
         private void ClearCells()
@@ -114,6 +117,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 {
                     var cell = Instantiate(_cellViewPrefab, transform).GetComponent<CellView>();
                     Assert.IsNotNull(cell);
+                    cell.gameObject.name = $"Cell {x} {y}";
                     cell.transform.localPosition = new Vector3(x, y) * CellSize;
                     var pinnedX = x;
                     var pinnedY = y;
@@ -149,6 +153,8 @@ namespace Avangardum.LifeArena.UnityClient.Views
             var middleCellIndex = new Vector2Int(_cells.GetLength(0) / 2, _cells.GetLength(1) / 2);
             var zeroCellPosition = middleCellPosition - (Vector2)middleCellIndex * (CellSize * Zoom);
             transform.position = zeroCellPosition;
+            
+            SetCellBorderVisibility();
         }
 
         private float ZoomPercentageToZoom(float zoomPercentage)
@@ -161,6 +167,54 @@ namespace Avangardum.LifeArena.UnityClient.Views
         {
             Assert.IsTrue(zoom is >= MinZoom and <= MaxZoom);
             return Mathf.Pow((zoom - MinZoom) / (MaxZoom - MinZoom), 1 / SmoothZoomFactor);
+        }
+        
+        private void SetCellBorderVisibility()
+        {
+            var isBorderVisible = Zoom >= MinZoomToShowBorder;
+            
+            // Only set border visibility of cells currently visible on the screen.
+            
+            var cellAtScreenCenterIndex = GetCellAtScreenCenterIndex();
+            var screenHalfSizeInCellsFloat = ScreenSize / ZoomedCellSize / 2;
+            var screenHalfSizeInCells = new Vector2Int(Mathf.CeilToInt(screenHalfSizeInCellsFloat.x),
+                Mathf.CeilToInt(screenHalfSizeInCellsFloat.y));
+            var minX = Mathf.Max(0, cellAtScreenCenterIndex.x - screenHalfSizeInCells.x);
+            var maxX = Mathf.Min(_cells.GetLength(0) - 1, cellAtScreenCenterIndex.x + screenHalfSizeInCells.x);
+            var minY = Mathf.Max(0, cellAtScreenCenterIndex.y - screenHalfSizeInCells.y);
+            var maxY = Mathf.Min(_cells.GetLength(1) - 1, cellAtScreenCenterIndex.y + screenHalfSizeInCells.y);
+            try
+            {
+                Draw2DCross(_cells[minX, minY].transform.position, Color.red);
+                Draw2DCross(_cells[maxX, maxY].transform.position, Color.blue);
+                Draw2DCross(_cells[cellAtScreenCenterIndex.x, cellAtScreenCenterIndex.y].transform.position, Color.green);
+            }
+            catch (Exception)
+            {
+                
+            }
+
+            for (var x = minX; x <= maxX; x++)
+            {
+                for (var y = minY; y <= maxY; y++)
+                {
+                    _cells[x, y].IsBorderVisible = isBorderVisible;
+                }
+            }
+
+            void Draw2DCross(Vector2 position, Color color)
+            {
+                Debug.DrawLine(position + Vector2.left * 10f, position + Vector2.right * 10f, color, 3f);
+                Debug.DrawLine(position + Vector2.up * 10f, position + Vector2.down * 10f, color, 3f);
+            }
+        }
+
+        private Vector2Int GetCellAtScreenCenterIndex()
+        {
+            var screenCenterPositionRelativeToField = ScreenCenter - (Vector2)transform.localPosition;
+            var cellIndexFloat = screenCenterPositionRelativeToField / ZoomedCellSize;
+            var cellIndex = new Vector2Int(Mathf.RoundToInt(cellIndexFloat.x), Mathf.RoundToInt(cellIndexFloat.y));
+            return cellIndex;
         }
     }
 }
