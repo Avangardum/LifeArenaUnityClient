@@ -12,6 +12,9 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private const float MinZoom = 0.1f;
         private const float MinZoomToShowBorder = 0.4f;
         private const float CellSize = 50;
+
+        // When above 1, zoom will change faster when close to the max value.
+        private const float SmoothZoomFactor = 2f;
         
         [SerializeField] private GameObject _cellViewPrefab;
         
@@ -36,7 +39,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
             }
         }
 
-        public float Zoom
+        private float Zoom
         {
             get => transform.localScale.x;
             set
@@ -76,11 +79,12 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         public float ZoomPercentage
         {
-            get => Mathf.InverseLerp(MinZoom, MaxZoom, Zoom);
+            get => ZoomToZoomPercentage(Zoom);
             set
             {
-                if (value == ZoomPercentage) return;
-                Zoom = Mathf.Lerp(MinZoom, MaxZoom, value);
+                var clampedValue = Mathf.Clamp(value, 0, 1);
+                if (clampedValue == ZoomPercentage) return;
+                Zoom = ZoomPercentageToZoom(clampedValue);
             }
         }
 
@@ -145,6 +149,18 @@ namespace Avangardum.LifeArena.UnityClient.Views
             var middleCellIndex = new Vector2Int(_cells.GetLength(0) / 2, _cells.GetLength(1) / 2);
             var zeroCellPosition = middleCellPosition - (Vector2)middleCellIndex * (CellSize * Zoom);
             transform.position = zeroCellPosition;
+        }
+
+        private float ZoomPercentageToZoom(float zoomPercentage)
+        {
+            Assert.IsTrue(zoomPercentage is >= 0 and <= 1);
+            return MinZoom + Mathf.Pow(zoomPercentage, SmoothZoomFactor) * (MaxZoom - MinZoom);
+        }
+        
+        private float ZoomToZoomPercentage(float zoom)
+        {
+            Assert.IsTrue(zoom is >= MinZoom and <= MaxZoom);
+            return Mathf.Pow((zoom - MinZoom) / (MaxZoom - MinZoom), 1 / SmoothZoomFactor);
         }
     }
 }

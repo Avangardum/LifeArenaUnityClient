@@ -15,7 +15,7 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
             _fieldView = fieldView;
             
             _inputManager.FieldMovementRequested += OnFieldMovementRequested;
-            _inputManager.FieldZoomChangeRequested += OnFieldZoomChangeRequested;
+            _inputManager.FieldZoomPercentageChangeRequested += OnFieldZoomPercentageChangeRequested;
         }
 
         private void OnFieldMovementRequested(object sender, IInputManager.FieldMovementRequestedEventArgs e)
@@ -23,10 +23,10 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
             _fieldView.Move(e.Movement);
         }
 
-        private void OnFieldZoomChangeRequested(object sender, IInputManager.FieldZoomChangeRequestedEventArgs e)
+        private void OnFieldZoomPercentageChangeRequested(object sender, IInputManager.FieldZoomPercentageChangeRequestedEventArgs e)
         {
             _fieldView.ZoomFocusPointMode = ZoomFocusPointMode.Mouse;
-            _fieldView.Zoom += e.ZoomChange;
+            _fieldView.ZoomPercentage += e.ZoomPercentageChange;
         }
     }
 }

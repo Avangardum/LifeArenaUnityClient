@@ -6,9 +6,9 @@ namespace Avangardum.LifeArena.UnityClient.Interfaces
     public interface IInputManager
     {
         public record FieldMovementRequestedEventArgs(Vector2 Movement);
-        public record FieldZoomChangeRequestedEventArgs(float ZoomChange);
+        public record FieldZoomPercentageChangeRequestedEventArgs(float ZoomPercentageChange);
         
         event EventHandler<FieldMovementRequestedEventArgs> FieldMovementRequested;
-        event EventHandler<FieldZoomChangeRequestedEventArgs> FieldZoomChangeRequested;
+        event EventHandler<FieldZoomPercentageChangeRequestedEventArgs> FieldZoomPercentageChangeRequested;
     }
 }

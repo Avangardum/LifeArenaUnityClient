@@ -11,7 +11,6 @@ namespace Avangardum.LifeArena.UnityClient.Interfaces
         event EventHandler<ZoomChangedEventArgs> ZoomChanged;
 
         bool[,] LivingCells { set; }
-        float Zoom { get; set; }
         float ZoomPercentage { get; set; }
         ZoomFocusPointMode ZoomFocusPointMode { set; }
         
