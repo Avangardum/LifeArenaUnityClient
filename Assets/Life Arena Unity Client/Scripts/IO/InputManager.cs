@@ -14,6 +14,7 @@ namespace Avangardum.LifeArena.UnityClient.IO
         private const float ScrollZoomSensitivity = 0.1f;
 
         private Vector2? _lastMousePosition;
+        private bool _wasMouseDownLastTick;
         
         public event EventHandler<FieldMovementRequestedEventArgs> FieldMovementRequested;
         public event EventHandler<FieldZoomPercentageChangeRequestedEventArgs> FieldZoomPercentageChangeRequested;
@@ -39,13 +40,15 @@ namespace Avangardum.LifeArena.UnityClient.IO
 
             void ProcessFieldMovement()
             {
-                if (Input.GetMouseButton(0) && IsMouseOverField && _lastMousePosition is { } lastMousePosition)
+                if (Input.GetMouseButton(0) && _wasMouseDownLastTick && IsMouseOverField && 
+                    _lastMousePosition is { } lastMousePosition)
                 {
                     var mousePositionDelta = (Vector2)Input.mousePosition - lastMousePosition;
                     FieldMovementRequested?.Invoke(this, new FieldMovementRequestedEventArgs(mousePositionDelta));
                 }
 
                 _lastMousePosition = Input.mousePosition;
+                _wasMouseDownLastTick = Input.GetMouseButton(0);
             }
             
             void ProcessFieldZoom()
