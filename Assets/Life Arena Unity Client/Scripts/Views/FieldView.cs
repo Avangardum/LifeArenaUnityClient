@@ -110,6 +110,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         private void CreateCells(int width, int height)
         {
+            Assert.IsTrue(width > 0 && height > 0);
             _cells = new CellView[width, height];
             for (var x = 0; x < width; x++)
             {
@@ -171,6 +172,8 @@ namespace Avangardum.LifeArena.UnityClient.Views
         
         private void SetCellBorderVisibility()
         {
+            if (_cells == null) return;
+            
             var isBorderVisible = Zoom >= MinZoomToShowBorder;
             
             // Only set border visibility of cells currently visible on the screen.
