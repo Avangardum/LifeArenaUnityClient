@@ -37,6 +37,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 _windowManager.IsServerUnavailableWindowVisible = false;
                 
                 _header.Generation = value.Generation;
+                _header.NextGenerationInterval = value.NextGenerationInterval;
                 _header.TimeUntilNextGeneration = value.TimeUntilNextGeneration;
                 _header.CellsLeft = value.CellsLeft;
             }

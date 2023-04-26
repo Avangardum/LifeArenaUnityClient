@@ -40,7 +40,6 @@ namespace Avangardum.LifeArena.UnityClient.Views
             {
                 _timeUntilNextGeneration = value;
                 _timeUntilNextGenerationText.text = _timeUntilNextGeneration.TotalSeconds.ToString("F1");
-                NextGenerationInterval = TimeSpan.FromSeconds(5); // TODO get from server instead
                 Assert.AreNotEqual(TimeSpan.Zero, NextGenerationInterval);
                 var fillAmount = Mathf.InverseLerp(0, (float)NextGenerationInterval.TotalSeconds, 
                     (float)_timeUntilNextGeneration.TotalSeconds);

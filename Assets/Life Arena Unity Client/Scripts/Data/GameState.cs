@@ -2,6 +2,6 @@
 
 namespace Avangardum.LifeArena.UnityClient.Data
 {
-    public record GameState(bool[,] LivingCells, int Generation, TimeSpan TimeUntilNextGeneration, int CellsLeft, 
-        int MaxCellsPerPlayerPerGeneration);
+    public record GameState(bool[,] LivingCells, int Generation, TimeSpan TimeUntilNextGeneration, 
+        TimeSpan NextGenerationInterval, int CellsLeft, int MaxCellsPerPlayerPerGeneration);
 }
