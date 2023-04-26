@@ -38,9 +38,16 @@ namespace Avangardum.LifeArena.UnityClient.Views
             private get => _timeUntilNextGeneration;
             set
             {
+                Assert.AreNotEqual(TimeSpan.Zero, NextGenerationInterval);
+
+                // Sometimes due to network latency, the new TimeUntilNextGeneration is a bit greater than the local value.
+                // In this case, ignore it and continue using the local value to prevent timer jitter.
+                var timerJitterPreventionThreshold = TimeSpan.FromSeconds(0.3);
+                if (value > _timeUntilNextGeneration && value - _timeUntilNextGeneration < timerJitterPreventionThreshold) 
+                    return;
+                
                 _timeUntilNextGeneration = value;
                 _timeUntilNextGenerationText.text = _timeUntilNextGeneration.TotalSeconds.ToString("F1");
-                Assert.AreNotEqual(TimeSpan.Zero, NextGenerationInterval);
                 var fillAmount = Mathf.InverseLerp(0, (float)NextGenerationInterval.TotalSeconds, 
                     (float)_timeUntilNextGeneration.TotalSeconds);
                 if (Generation % 2 == 1)
@@ -70,11 +77,14 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         private void Update()
         {
-            TimeUntilNextGeneration -= TimeSpan.FromSeconds(Time.deltaTime);
-            if (TimeUntilNextGeneration < TimeSpan.Zero)
+            if (TimeUntilNextGeneration == TimeSpan.Zero) return; // Didn't receive GameState yet
+
+            var timeUntilNextGeneration = TimeUntilNextGeneration - TimeSpan.FromSeconds(Time.deltaTime);
+            if (timeUntilNextGeneration < TimeSpan.Zero)
             {
-                TimeUntilNextGeneration = TimeSpan.Zero;
+                timeUntilNextGeneration = TimeSpan.Zero;
             }
+            TimeUntilNextGeneration = timeUntilNextGeneration;
         }
 
         private void OnZoomSliderValueChanged(float value)

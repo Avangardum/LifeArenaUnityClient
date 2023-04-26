@@ -9,7 +9,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
     public class FieldView : MonoBehaviour, IFieldView
     {
         private const float MaxZoom = 2f;
-        private const float MinZoom = 0.1f;
+        private const float MinZoom = 0.15f;
         private const float MinZoomToShowBorder = 0.4f;
         private const float CellSize = 50;
 

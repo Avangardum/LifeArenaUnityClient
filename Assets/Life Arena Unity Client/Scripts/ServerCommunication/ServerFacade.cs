@@ -13,11 +13,11 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
     public class ServerFacade : IServerFacade
     {
         private const string InternetConnectionTestUrl = "https://www.google.com";
-        private const string ServerUrl = "http://localhost:5050";
+        private const string ServerUrl = "http://lifearena.avangardum.net";
         private const string GameApiRootUrl = ServerUrl + "/Api/Game";
         private const string GetGameStateUrl = GameApiRootUrl + "/GetState";
         private const string AddCellUrlTemplate = GameApiRootUrl + "/AddCell?x={0}&y={1}";
-        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(3);
         
         ILivingCellsArrayPreserializer _livingCellsArrayPreserializer;
 
