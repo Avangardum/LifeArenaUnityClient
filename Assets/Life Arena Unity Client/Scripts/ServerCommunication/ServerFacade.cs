@@ -18,7 +18,7 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
         private const string AddCellUrlTemplate = GameApiRootUrl + "/AddCell?x={0}&y={1}";
         private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(3);
         
-        ILivingCellsArrayPreserializer _livingCellsArrayPreserializer;
+        private readonly ILivingCellsArrayPreserializer _livingCellsArrayPreserializer;
 
         public ServerFacade(ILivingCellsArrayPreserializer livingCellsArrayPreserializer)
         {
