@@ -54,11 +54,6 @@ namespace Avangardum.LifeArena.UnityClient.Views
             _windowManager.IsNoInternetConnectionWindowVisible = false;
             _windowManager.IsServerUnavailableWindowVisible = true;
         }
-
-        public void ShowUnknownErrorMessage(string message)
-        {
-            Debug.LogError(message);
-        }
         
         private void OnCellClicked(object sender, CellClickedEventArgs e)
         {

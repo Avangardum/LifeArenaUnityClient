@@ -54,10 +54,6 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
             {
                 _gameView.ShowServerUnavailableMessage();
             }
-            catch (Exception e)
-            {
-                _gameView.ShowUnknownErrorMessage(e.ToString());
-            }
 
             _lastGameStateUpdateTime = DateTime.Now;
         }
@@ -81,10 +77,6 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
             catch (ServerUnavailableException)
             {
                 _gameView.ShowServerUnavailableMessage();
-            }
-            catch (Exception exception)
-            {
-                _gameView.ShowUnknownErrorMessage(exception.ToString());
             }
             
             _lastGameStateUpdateTime = DateTime.Now;

@@ -12,7 +12,5 @@ namespace Avangardum.LifeArena.UnityClient.Interfaces
         void ShowNoInternetConnectionMessage();
         
         void ShowServerUnavailableMessage();
-        
-        void ShowUnknownErrorMessage(string message);
     }
 }
