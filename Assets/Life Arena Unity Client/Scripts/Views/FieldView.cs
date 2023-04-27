@@ -10,6 +10,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
     {
         private const float MaxZoom = 2f;
         private const float MinZoom = 0.15f;
+        private const float DefaultZoom = 1f;
         private const float MinZoomToShowBorder = 0.4f;
         private const float CellSize = 50;
 
@@ -22,13 +23,13 @@ namespace Avangardum.LifeArena.UnityClient.Views
         
         public event EventHandler<CellClickedEventArgs> CellClicked;
         public event EventHandler<ZoomChangedEventArgs> ZoomChanged;
-
+        
         public bool[,] LivingCells
         {
             set
             {
-                var shouldRecreateCells = _cells == null || _cells.GetLength(0) != value.GetLength(0) || 
-                    _cells.GetLength(1) != value.GetLength(1);
+                var shouldRecreateCells = _cells == null || CellsWidth != value.GetLength(0) || 
+                    CellsHeight != value.GetLength(1);
                 if (shouldRecreateCells)
                 {
                     ClearCells();
@@ -59,23 +60,25 @@ namespace Avangardum.LifeArena.UnityClient.Views
             {
                 if (value == Zoom) return;
                 
-                // Focus point is the position of the mouse(in case of scrolling) / center of the screen (in case of
-                // using zoom slider) in the coordinate system of the field if zoom is 1.
-                // After zooming, the focus point should remain the same, so that the mouse is still over the same cell.
-                // Focus is the above mentioned object (mouse / center of the screen)
+                // Focus is the object that should remain over same position in the field after zooming (mouse or screen center).
+                // Relative focus position is the position of the focus in the coordinate system of the field.
+                // Normalized relative focus position is the relative focus position if zoom is 1.
+                // Relative focus position = normalized relative focus position * zoom.
+                // Normalized relative focus position = relative focus position / zoom.
+                // Normalized relative focus position should remain the same after zooming.
                 var focusPosition = ZoomFocusPointMode switch
                 {
                     ZoomFocusPointMode.Mouse => (Vector2)Input.mousePosition,
-                    ZoomFocusPointMode.ScreenCenter => new Vector2(Screen.width / 2f, Screen.height / 2f),
+                    ZoomFocusPointMode.ScreenCenter => ScreenCenter,
                     _ => throw new ArgumentOutOfRangeException()
                 };
-                var focusPoint = ( focusPosition - (Vector2)transform.position ) / Zoom;
+                var oldRelativeFocusPosition = focusPosition - (Vector2)transform.position;
+                var normalizedRelativeFocusPosition = oldRelativeFocusPosition / Zoom;
                 
                 var newZoom = Mathf.Clamp(value, MinZoom, MaxZoom);
                 transform.localScale = new Vector3(newZoom, newZoom, 1f);
                 
-                // What position the focus should have in the coordinate system of the field after zooming.
-                var newRelativeFocusPosition = focusPoint * newZoom;
+                var newRelativeFocusPosition = normalizedRelativeFocusPosition * newZoom;
                 
                 var newPosition = focusPosition - newRelativeFocusPosition;
                 transform.position = newPosition;
@@ -87,11 +90,17 @@ namespace Avangardum.LifeArena.UnityClient.Views
         }
         
         private float ZoomedCellSize => CellSize * Zoom;
-        
-        private Vector2 ScreenCenter => Vector2.zero;
-        
-        private Vector2 ScreenSize => new Vector2(Screen.width, Screen.height);
 
+        private Vector2 ScreenCenter => ScreenSize / 2;
+        
+        private Vector2 ScreenCenterRelativeToCanvas => Vector2.zero;
+        
+        private Vector2 ScreenSize => new(Screen.width, Screen.height);
+        
+        private int CellsWidth => _cells.GetLength(0);
+        
+        private int CellsHeight => _cells.GetLength(1);
+        
         public void Move(Vector2 movement)
         {
             transform.Translate(movement, Space.World);
@@ -135,9 +144,10 @@ namespace Avangardum.LifeArena.UnityClient.Views
 
         private void ColorCells(bool[,] livingCells)
         {
-            for (var x = 0; x < livingCells.GetLength(0); x++)
+            Assert.IsTrue(livingCells.GetLength(0) == CellsWidth && livingCells.GetLength(1) == CellsHeight);
+            for (var x = 0; x < CellsWidth; x++)
             {
-                for (var y = 0; y < livingCells.GetLength(1); y++)
+                for (var y = 0; y < CellsHeight; y++)
                 {
                     _cells[x, y].IsAlive = livingCells[x, y];
                 }
@@ -146,12 +156,12 @@ namespace Avangardum.LifeArena.UnityClient.Views
         
         private void ResetPositionAndZoom()
         {
-            Zoom = MinZoom;
+            Zoom = DefaultZoom;
             
             // Middle cell should be in the middle of the screen.
             // Zero cell position is equal to field position
-            var middleCellPosition = new Vector2(Screen.width, Screen.height) / 2;
-            var middleCellIndex = new Vector2Int(_cells.GetLength(0) / 2, _cells.GetLength(1) / 2);
+            var middleCellPosition = ScreenCenter;
+            var middleCellIndex = new Vector2Int(CellsWidth / 2, CellsHeight / 2);
             var zeroCellPosition = middleCellPosition - (Vector2)middleCellIndex * (CellSize * Zoom);
             transform.position = zeroCellPosition;
             
@@ -177,44 +187,33 @@ namespace Avangardum.LifeArena.UnityClient.Views
             var isBorderVisible = Zoom >= MinZoomToShowBorder;
             
             // Only set border visibility of cells currently visible on the screen.
-            
+            var borderIndices = GetVisibleCellsBorderIndices();
+            for (var x = borderIndices.MinX; x <= borderIndices.MaxX; x++)
+            {
+                for (var y = borderIndices.MinY; y <= borderIndices.MaxY; y++)
+                {
+                    _cells[x, y].IsBorderVisible = isBorderVisible;
+                }
+            }
+        }
+
+        private (int MinX, int MaxX, int MinY, int MaxY) GetVisibleCellsBorderIndices()
+        {
             var cellAtScreenCenterIndex = GetCellAtScreenCenterIndex();
             var screenHalfSizeInCellsFloat = ScreenSize / ZoomedCellSize / 2;
             var screenHalfSizeInCells = new Vector2Int(Mathf.CeilToInt(screenHalfSizeInCellsFloat.x),
                 Mathf.CeilToInt(screenHalfSizeInCellsFloat.y));
             var minX = Mathf.Max(0, cellAtScreenCenterIndex.x - screenHalfSizeInCells.x);
-            var maxX = Mathf.Min(_cells.GetLength(0) - 1, cellAtScreenCenterIndex.x + screenHalfSizeInCells.x);
+            var maxX = Mathf.Min(CellsWidth - 1, cellAtScreenCenterIndex.x + screenHalfSizeInCells.x);
             var minY = Mathf.Max(0, cellAtScreenCenterIndex.y - screenHalfSizeInCells.y);
-            var maxY = Mathf.Min(_cells.GetLength(1) - 1, cellAtScreenCenterIndex.y + screenHalfSizeInCells.y);
-            try
-            {
-                Draw2DCross(_cells[minX, minY].transform.position, Color.red);
-                Draw2DCross(_cells[maxX, maxY].transform.position, Color.blue);
-                Draw2DCross(_cells[cellAtScreenCenterIndex.x, cellAtScreenCenterIndex.y].transform.position, Color.green);
-            }
-            catch (Exception)
-            {
-                
-            }
-
-            for (var x = minX; x <= maxX; x++)
-            {
-                for (var y = minY; y <= maxY; y++)
-                {
-                    _cells[x, y].IsBorderVisible = isBorderVisible;
-                }
-            }
-
-            void Draw2DCross(Vector2 position, Color color)
-            {
-                Debug.DrawLine(position + Vector2.left * 10f, position + Vector2.right * 10f, color, 3f);
-                Debug.DrawLine(position + Vector2.up * 10f, position + Vector2.down * 10f, color, 3f);
-            }
+            var maxY = Mathf.Min(CellsHeight - 1, cellAtScreenCenterIndex.y + screenHalfSizeInCells.y);
+            
+            return (minX, maxX, minY, maxY);
         }
-
+        
         private Vector2Int GetCellAtScreenCenterIndex()
         {
-            var screenCenterPositionRelativeToField = ScreenCenter - (Vector2)transform.localPosition;
+            var screenCenterPositionRelativeToField = ScreenCenterRelativeToCanvas - (Vector2)transform.localPosition;
             var cellIndexFloat = screenCenterPositionRelativeToField / ZoomedCellSize;
             var cellIndex = new Vector2Int(Mathf.RoundToInt(cellIndexFloat.x), Mathf.RoundToInt(cellIndexFloat.y));
             return cellIndex;
