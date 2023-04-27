@@ -20,7 +20,8 @@ namespace Avangardum.LifeArena.UnityClient.Installers
             Container.Bind<IGameViewFacade>().To<GameViewFacade>().AsSingle();
             Container.Bind<GameViewManager>().AsSingle().NonLazy();
 
-            Container.Bind<ILivingCellsArrayPreserializer>().To<LivingCellsArrayPreserializer>().AsSingle();
+            Container.Bind<ILivingCellsArrayPreserializer>().FromMethod(() => new LivingCellsArrayPreserializer())
+                .AsSingle(); // Normal binding causes MissingMethodException in the WebGL build
             Container.Bind<IServerFacade>().To<ServerFacade>().AsSingle();
             
             Container.Bind<FieldInputPresenter>().AsSingle().NonLazy();
