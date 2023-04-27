@@ -10,6 +10,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
 {
     public class Header : MonoBehaviour, IHeader
     {
+        [SerializeField] private Button _helpButton;
         [SerializeField] private TextMeshProUGUI _generationText;
         [SerializeField] private TextMeshProUGUI _timeUntilNextGenerationText;
         [SerializeField] private Image _nextGenerationTimerClockFilling;
@@ -20,6 +21,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private TimeSpan _timeUntilNextGeneration;
         
         public event EventHandler<ZoomPercentageChangedEventArgs> ZoomPercentageChanged;
+        public event EventHandler HelpClicked;
 
         public int Generation
         {
@@ -73,6 +75,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private void Awake()
         {
             _zoomSlider.onValueChanged.AddListener(OnZoomSliderValueChanged);
+            _helpButton.onClick.AddListener(OnHelpButtonClicked);
         }
 
         private void Update()
@@ -90,6 +93,11 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private void OnZoomSliderValueChanged(float value)
         {
             ZoomPercentageChanged?.Invoke(this, new ZoomPercentageChangedEventArgs(value));
+        }
+
+        private void OnHelpButtonClicked()
+        {
+            HelpClicked?.Invoke(this, EventArgs.Empty);
         }
     }
 }

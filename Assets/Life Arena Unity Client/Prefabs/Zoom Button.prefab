@@ -7,6 +7,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1413383687501827389, guid: 1ed5d9ec1b4e36a4e9ae7ee79e20b028, type: 3}
+      propertyPath: m_text
+      value: +
+      objectReference: {fileID: 0}
+    - target: {fileID: 1413383687501827389, guid: 1ed5d9ec1b4e36a4e9ae7ee79e20b028, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 1413383687501827389, guid: 1ed5d9ec1b4e36a4e9ae7ee79e20b028, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2658414471243483508, guid: 1ed5d9ec1b4e36a4e9ae7ee79e20b028, type: 3}
       propertyPath: m_text
       value: +
@@ -18,7 +30,7 @@ PrefabInstance:
     - target: {fileID: 3758445039103181638, guid: 1ed5d9ec1b4e36a4e9ae7ee79e20b028, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+      objectReference: {fileID: 21300000, guid: b36dabbfca3a1a347a4470b7406a0472, type: 3}
     - target: {fileID: 6417239255321272490, guid: 1ed5d9ec1b4e36a4e9ae7ee79e20b028, type: 3}
       propertyPath: m_Pivot.x
       value: 1

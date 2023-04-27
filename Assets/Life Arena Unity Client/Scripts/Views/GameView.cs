@@ -1,7 +1,6 @@
 ﻿using System;
 using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Interfaces;
-using UnityEngine;
 using Zenject;
 
 namespace Avangardum.LifeArena.UnityClient.Views
@@ -23,6 +22,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
             _fieldView.ZoomChanged += OnFieldZoomChanged;
             
             _header.ZoomPercentageChanged += OnHeaderZoomPercentageChanged;
+            _header.HelpClicked += OnHelpClicked;
         }
 
         public event EventHandler<CellClickedEventArgs> CellClicked;
@@ -69,6 +69,11 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private void OnFieldZoomChanged(object sender, ZoomChangedEventArgs e)
         {
             _header.ZoomPercentage = e.ZoomPercentage;
+        }
+        
+        private void OnHelpClicked(object sender, EventArgs e)
+        {
+            _windowManager.IsHelpWindowVisible = true;
         }
     }
 }
