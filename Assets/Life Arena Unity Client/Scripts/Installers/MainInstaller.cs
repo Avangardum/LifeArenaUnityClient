@@ -17,7 +17,8 @@ namespace Avangardum.LifeArena.UnityClient.Installers
             Container.Bind<IFieldView>().FromComponentInHierarchy().AsSingle();
             Container.Bind<IWindowManager>().FromComponentInHierarchy().AsSingle();
             Container.Bind<IHeader>().FromComponentInHierarchy().AsSingle();
-            Container.Bind<IGameView>().To<GameView>().AsSingle();
+            Container.Bind<IGameViewFacade>().To<GameViewFacade>().AsSingle();
+            Container.Bind<GameViewManager>().AsSingle().NonLazy();
 
             Container.Bind<ILivingCellsArrayPreserializer>().To<LivingCellsArrayPreserializer>().AsSingle();
             Container.Bind<IServerFacade>().To<ServerFacade>().AsSingle();

@@ -3,7 +3,7 @@ using Avangardum.LifeArena.UnityClient.Data;
 
 namespace Avangardum.LifeArena.UnityClient.Interfaces
 {
-    public interface IGameView
+    public interface IGameViewFacade
     {
         event EventHandler<CellClickedEventArgs> CellClicked;
 

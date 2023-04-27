@@ -9,10 +9,10 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
     public class GamePresenter
     {
         private IServerFacade _serverFacade;
-        private IGameView _gameView;
+        private IGameViewFacade _gameView;
         private DateTime _lastGameStateUpdateTime;
 
-        public GamePresenter(IServerFacade serverFacade, IGameView gameView)
+        public GamePresenter(IServerFacade serverFacade, IGameViewFacade gameView)
         {
             _serverFacade = serverFacade;
             _gameView = gameView;

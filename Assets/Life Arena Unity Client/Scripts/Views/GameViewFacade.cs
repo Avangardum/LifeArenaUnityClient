@@ -5,26 +5,15 @@ using Zenject;
 
 namespace Avangardum.LifeArena.UnityClient.Views
 {
-    public class GameView : IGameView
+    /// <summary>
+    /// Provides a centralized interface for interacting with the game view as a whole.
+    /// </summary>
+    public class GameViewFacade : IGameViewFacade
     {
         private IFieldView _fieldView;
         private IWindowManager _windowManager;
         private IHeader _header;
         
-        [Inject]
-        public void Inject(IFieldView fieldView, IWindowManager windowManager, IHeader header)
-        {
-            _fieldView = fieldView;
-            _windowManager = windowManager;
-            _header = header;
-            
-            _fieldView.CellClicked += OnCellClicked;
-            _fieldView.ZoomChanged += OnFieldZoomChanged;
-            
-            _header.ZoomPercentageChanged += OnHeaderZoomPercentageChanged;
-            _header.HelpClicked += OnHelpClicked;
-        }
-
         public event EventHandler<CellClickedEventArgs> CellClicked;
 
         public GameState GameState
@@ -42,7 +31,17 @@ namespace Avangardum.LifeArena.UnityClient.Views
                 _header.CellsLeft = value.CellsLeft;
             }
         }
-
+        
+        [Inject]
+        public void Inject(IFieldView fieldView, IWindowManager windowManager, IHeader header)
+        {
+            _fieldView = fieldView;
+            _windowManager = windowManager;
+            _header = header;
+            
+            _fieldView.CellClicked += OnCellClicked;
+        }
+        
         public void ShowNoInternetConnectionMessage()
         {
             _windowManager.IsServerUnavailableWindowVisible = false;
@@ -58,22 +57,6 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private void OnCellClicked(object sender, CellClickedEventArgs e)
         {
             CellClicked?.Invoke(this, e);
-        }
-        
-        private void OnHeaderZoomPercentageChanged(object sender, ZoomPercentageChangedEventArgs e)
-        {
-            _fieldView.ZoomFocusPointMode = ZoomFocusPointMode.ScreenCenter;
-            _fieldView.ZoomPercentage = e.ZoomPercentage;
-        }
-        
-        private void OnFieldZoomChanged(object sender, ZoomChangedEventArgs e)
-        {
-            _header.ZoomPercentage = e.ZoomPercentage;
-        }
-        
-        private void OnHelpClicked(object sender, EventArgs e)
-        {
-            _windowManager.IsHelpWindowVisible = true;
         }
     }
 }
