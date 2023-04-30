@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Avangardum.AvangardumUnityUtilityLib;
 using Avangardum.LifeArena.Shared;
 using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Exceptions;
 using Avangardum.LifeArena.UnityClient.Interfaces;
 using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Avangardum.LifeArena.UnityClient.ServerCommunication
 {
@@ -16,7 +20,9 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
         private const string GameApiRootUrl = ServerUrl + "/Api/Game";
         private const string GetGameStateUrl = GameApiRootUrl + "/GetState";
         private const string AddCellUrlTemplate = GameApiRootUrl + "/AddCell?x={0}&y={1}";
-        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(3);
+        private static readonly int TimeoutSeconds = 3;
+        private const string GetMethod = "GET";
+        private const string PutMethod = "PUT";
         
         private readonly ILivingCellsArrayPreserializer _livingCellsArrayPreserializer;
 
@@ -25,98 +31,65 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
             _livingCellsArrayPreserializer = livingCellsArrayPreserializer;
         }
         
-        public async Task<GameState> GetGameState()
-        {
-            using var client = CreateHttpClient();
-            HttpResponseMessage response;
-            try
-            {
-                response = await client.GetAsync(GetGameStateUrl);
-            }
-            catch
-            {
-                await ProcessHttpRequestException();
-                throw new Exception(); // Should never be reached
-            }
-            AssertIsSuccessStatusCode(response);
-            return await ProcessGameStateResponse(response);
-        }
+        public Task<GameState> GetGameState() => SendRequestAndReceiveGameState(GetGameStateUrl, GetMethod);
 
-        public async Task<GameState> AddCell(int x, int y)
-        {
-            using var client = CreateHttpClient();
-            var url = string.Format(AddCellUrlTemplate, x, y);
-            HttpResponseMessage response;
-            try
-            {
-                response = await client.PutAsync(url, null);
-            }
-            catch
-            {
-                await ProcessHttpRequestException();
-                throw new Exception(); // Should never be reached
-            }
-            AssertIsSuccessStatusCode(response);
-            return await ProcessGameStateResponse(response);
-        }
+        public Task<GameState> AddCell(int x, int y) => 
+            SendRequestAndReceiveGameState(string.Format(AddCellUrlTemplate, x, y), PutMethod);
 
-        private async Task<GameState> ProcessGameStateResponse(HttpResponseMessage response)
+        private async Task<GameState> SendRequestAndReceiveGameState(string url, string method)
         {
-            var json = await response.Content.ReadAsStringAsync();
-            var gameStateResponse = JsonConvert.DeserializeObject<GameStateResponse>(json);
-            var livingCells = _livingCellsArrayPreserializer.Depreserialize(gameStateResponse.LivingCells);
+            using var request = await SendRequest(url, method);
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                if (await IsConnectedToInternet())
+                {
+                    throw new ServerUnavailableException();
+                }
+                else
+                {
+                    throw new NoInternetConnectionException();
+                }
+            }
+
+            var jsonResponse = request.downloadHandler.text;
+            var parsedResponse = JsonConvert.DeserializeObject<GameStateResponse>(jsonResponse);
             var gameState = new GameState
             (
-                LivingCells: livingCells, 
-                Generation: gameStateResponse.Generation, 
-                TimeUntilNextGeneration: gameStateResponse.TimeUntilNextGeneration, 
-                NextGenerationInterval: gameStateResponse.NextGenerationInterval,
-                CellsLeft: gameStateResponse.CellsLeft, 
-                MaxCellsPerPlayerPerGeneration: gameStateResponse.MaxCellsPerPlayerPerGeneration
+                LivingCells: _livingCellsArrayPreserializer.Depreserialize(parsedResponse.LivingCells),
+                Generation: parsedResponse.Generation,
+                TimeUntilNextGeneration: parsedResponse.TimeUntilNextGeneration,
+                NextGenerationInterval: parsedResponse.NextGenerationInterval,
+                CellsLeft: parsedResponse.CellsLeft,
+                MaxCellsPerPlayerPerGeneration: parsedResponse.MaxCellsPerPlayerPerGeneration
             );
             return gameState;
         }
 
-        private HttpClient CreateHttpClient()
+        private async Task<UnityWebRequest> SendRequest(string url, string method)
         {
-            var client = new HttpClient();
-            client.Timeout = Timeout;
-            return client;
-        }
-
-        private static void AssertIsSuccessStatusCode(HttpResponseMessage response)
-        {
-            if (!response.IsSuccessStatusCode)
+            var request = CreateRequest(url, method);
+            var sendRequestOperation = request.SendWebRequest();
+            await CoroutineHelper.StartCoroutine(AwaitSendRequestOperationCoroutine(sendRequestOperation)).ToTask();
+            return request;
+            
+            IEnumerator AwaitSendRequestOperationCoroutine(UnityWebRequestAsyncOperation operation)
             {
-                throw new HttpRequestException($"Server returned {response.StatusCode} status code");
+                yield return operation;
             }
         }
 
-        private async Task ProcessHttpRequestException()
+        private UnityWebRequest CreateRequest(string url, string method)
         {
-            if (await IsConnectedToInternet())
-            {
-                throw new ServerUnavailableException();
-            }
-            else
-            {
-                throw new NoInternetConnectionException();
-            }
+            var request = new UnityWebRequest(url, method);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.timeout = TimeoutSeconds;
+            return request;
         }
 
         private async Task<bool> IsConnectedToInternet()
         {
-            try
-            {
-                using var client = new HttpClient();
-                client.Timeout = Timeout;
-                await client.GetAsync(InternetConnectionTestUrl);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            using var request = await SendRequest(InternetConnectionTestUrl, GetMethod);
+            return request.result == UnityWebRequest.Result.Success;
         }
     }
 }
