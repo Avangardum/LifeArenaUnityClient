@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Avangardum.AvangardumUnityUtilityLib;
@@ -8,6 +9,7 @@ using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Exceptions;
 using Avangardum.LifeArena.UnityClient.Interfaces;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -52,15 +54,17 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
             }
 
             var jsonResponse = request.downloadHandler.text;
-            var parsedResponse = JsonConvert.DeserializeObject<GameStateResponse>(jsonResponse);
+            var jsonRoot = JObject.Parse(jsonResponse);
+            var livingCells = _livingCellsArrayPreserializer
+                .Depreserialize(jsonRoot["livingCells"]!.ToObject<List<string>>());
             var gameState = new GameState
             (
-                LivingCells: _livingCellsArrayPreserializer.Depreserialize(parsedResponse.LivingCells),
-                Generation: parsedResponse.Generation,
-                TimeUntilNextGeneration: parsedResponse.TimeUntilNextGeneration,
-                NextGenerationInterval: parsedResponse.NextGenerationInterval,
-                CellsLeft: parsedResponse.CellsLeft,
-                MaxCellsPerPlayerPerGeneration: parsedResponse.MaxCellsPerPlayerPerGeneration
+                LivingCells: livingCells,
+                Generation: jsonRoot["generation"]!.ToObject<int>(),
+                TimeUntilNextGeneration: jsonRoot["timeUntilNextGeneration"]!.ToObject<TimeSpan>(),
+                NextGenerationInterval: jsonRoot["nextGenerationInterval"]!.ToObject<TimeSpan>(),
+                CellsLeft: jsonRoot["cellsLeft"]!.ToObject<int>(),
+                MaxCellsPerPlayerPerGeneration: jsonRoot["maxCellsPerPlayerPerGeneration"]!.ToObject<int>()
             );
             return gameState;
         }
