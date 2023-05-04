@@ -18,7 +18,7 @@ namespace Avangardum.LifeArena.UnityClient.ServerCommunication
     public class ServerFacade : IServerFacade
     {
         private const string InternetConnectionTestUrl = "https://www.google.com";
-        private const string ServerUrl = "https://localhost:7206";
+        private const string ServerUrl = "";
         private const string GameApiRootUrl = ServerUrl + "/Api/Game";
         private const string GetGameStateUrl = GameApiRootUrl + "/GetState";
         private const string AddCellUrlTemplate = GameApiRootUrl + "/AddCell?x={0}&y={1}";
