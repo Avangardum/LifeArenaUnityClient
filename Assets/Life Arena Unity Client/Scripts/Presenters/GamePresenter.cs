@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using Avangardum.LifeArena.UnityClient.Data;
 using Avangardum.LifeArena.UnityClient.Exceptions;
+using Avangardum.LifeArena.UnityClient.Helpers;
 using Avangardum.LifeArena.UnityClient.Interfaces;
+using UnityEngine;
 
 namespace Avangardum.LifeArena.UnityClient.Presenters
 {
@@ -33,7 +35,7 @@ namespace Avangardum.LifeArena.UnityClient.Presenters
 
                 while (DateTime.Now - _lastGameStateUpdateTime < getGameStateDelay)
                 {
-                    await Task.Delay(timerCheckDelay);
+                    await AsyncHelper.Delay(timerCheckDelay);
                 }
             }
             // ReSharper disable once FunctionNeverReturns
