@@ -11,7 +11,7 @@ namespace Avangardum.LifeArena.UnityClient.Views
         private const float MaxZoom = 2f;
         private const float MinZoom = 0.15f;
         private const float DefaultZoom = 0.5f;
-        private const float MinZoomToShowBorder = 0.4f;
+            private const float MinZoomToShowBorder = 0.3f;
         private const float CellSize = 50;
 
         // When above 1, zoom will change faster when close to the max value.
