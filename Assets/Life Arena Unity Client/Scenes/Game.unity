@@ -3012,7 +3012,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aaef161da10a41e2acfc3ea375b4dce7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _url: /GithubLinks
+  _url: https://github.com/Avangardum/LifeArenaServer
 --- !u!224 &1725208792 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6417239255321272490, guid: 1ed5d9ec1b4e36a4e9ae7ee79e20b028, type: 3}
